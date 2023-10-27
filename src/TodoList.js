@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import Todo from "./Todo";
+import { useImmer } from "use-immer";
 import NewTodoForm from "./NewTodoForm";
 
 function TodoList() {
-  const [todos, setTodos] = useState([]);
+  const [todos, setTodos] = useImmer([]);
 
   // add a new todo
   const create = newTodo => {
@@ -12,10 +12,11 @@ function TodoList() {
 
   // update a todo with updatedTask
   // for loop with alert of non edited task here
-  const update = (id, updatedTask) => {
+  // still modifying this variable to benefit changes like adding an alert on edit
+  const modifyTodo = (id, editTask) => {
     setTodos(todos =>
-      todos.map(todo =>
-        todo.id === id ? { ...todo, task: updatedTask } : todo
+      todos.push(todo =>
+        todo.id === id ? {task: editTask, ...todo} : todo
       )
     );
   };
@@ -23,19 +24,25 @@ function TodoList() {
   // delete a todo by id
   // can use a for loop with condition here
   const remove = id => {
-    setTodos(todos => todos.filter(todo => todo.id !== id));
+    let arrayTodo = [];
+    for (let todo of todos) {
+        if( todo.id !== id ) {
+            arrayTodo.push(todo)
+        }
+    }
+    return setTodos(arrayTodo);
   };
 
 
   // can use props here
 
-  const todoComponents = todos.map(todo => (
+  const todoFeatures = todos.map(props => (
     <Todo
       remove={remove}
-      key={todo.id}
-      id={todo.id}
-      task={todo.task}
-      update={update}
+      key={props.id}
+      id={props.id}
+      task={props.task}
+      update={modifyTodo}
     />
   ));
 
@@ -44,7 +51,7 @@ function TodoList() {
   return (
     <div>
       <NewTodoForm createTodo={create} />
-      <ul>{todoComponents}</ul>
+      <ul>{todoFeatures}</ul>
     </div>
   );
 }
